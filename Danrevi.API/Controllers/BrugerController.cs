@@ -46,12 +46,7 @@ namespace Danrevi.API.Controllers
                 return BadRequest(ModelState);
             }
 
-            var isAdmin = _usercontext.IsAdmin(this.User);
-            if(!isAdmin)
-            {
-                return null;
-            }
-
+           
             var brugere = await _context.Brugere.FindAsync(id);
 
             if(brugere == null)
