@@ -43,11 +43,7 @@ namespace Danrevi.API.Controllers
                 return BadRequest(ModelState);
             }
 
-            var isAdmin = _usercontext.IsAdmin(this.User);
-            if(!isAdmin)
-            {
-                return null;
-            }
+           
 
             var møder = await _context.Møder.FindAsync(id);
 
