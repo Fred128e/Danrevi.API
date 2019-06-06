@@ -16,6 +16,7 @@ namespace Danrevi.API.Models
         }
 
         public virtual DbSet<Brugere> Brugere { get; set; }
+        public virtual DbSet<BrugerKurser> BrugerKurser { get; set; }
         public virtual DbSet<Deadline> Deadline { get; set; }
         public virtual DbSet<Kurser> Kurser { get; set; }
         public virtual DbSet<Møder> Møder { get; set; }
@@ -25,6 +26,7 @@ namespace Danrevi.API.Models
         {
             if (!optionsBuilder.IsConfigured)
             {
+#warning To protect potentially sensitive information in your connection string, you should move it out of source code. See http://go.microsoft.com/fwlink/?LinkId=723263 for guidance on storing connection strings.
                 optionsBuilder.UseSqlServer("Server=.;Database=DanreviDb;Trusted_Connection=True");
             }
         }
@@ -44,6 +46,27 @@ namespace Danrevi.API.Models
                 entity.Property(e => e.Email).HasMaxLength(100);
 
                 entity.Property(e => e.Phone).HasMaxLength(20);
+            });
+
+            modelBuilder.Entity<BrugerKurser>(entity =>
+            {
+                entity.HasKey(e => new { e.KursusId, e.Uid });
+
+                entity.ToTable("Bruger_Kurser");
+
+                entity.Property(e => e.Uid).HasMaxLength(30);
+
+                entity.HasOne(d => d.Kursus)
+                    .WithMany(p => p.BrugerKurser)
+                    .HasForeignKey(d => d.KursusId)
+                    .OnDelete(DeleteBehavior.ClientSetNull)
+                    .HasConstraintName("FK_Bruger_Kurser_Kurser");
+
+                entity.HasOne(d => d.U)
+                    .WithMany(p => p.BrugerKurser)
+                    .HasForeignKey(d => d.Uid)
+                    .OnDelete(DeleteBehavior.ClientSetNull)
+                    .HasConstraintName("FK_Bruger_Kurser_Brugere");
             });
 
             modelBuilder.Entity<Deadline>(entity =>
