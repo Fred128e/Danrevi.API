@@ -8,6 +8,7 @@ namespace Danrevi.API.Models
         public Brugere()
         {
             BrugerKurser = new HashSet<BrugerKurser>();
+            MøderBruger = new HashSet<MøderBruger>();
         }
 
         public string FirebaseUid { get; set; }
@@ -17,5 +18,6 @@ namespace Danrevi.API.Models
         public bool IsAdmin { get; set; }
 
         public ICollection<BrugerKurser> BrugerKurser { get; set; }
+        public ICollection<MøderBruger> MøderBruger { get; set; }
     }
 }

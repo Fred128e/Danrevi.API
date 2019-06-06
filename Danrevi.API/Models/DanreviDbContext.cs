@@ -20,6 +20,7 @@ namespace Danrevi.API.Models
         public virtual DbSet<Deadline> Deadline { get; set; }
         public virtual DbSet<Kurser> Kurser { get; set; }
         public virtual DbSet<Møder> Møder { get; set; }
+        public virtual DbSet<MøderBruger> MøderBruger { get; set; }
         public virtual DbSet<Nyheder> Nyheder { get; set; }
 
         protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
@@ -106,6 +107,27 @@ namespace Danrevi.API.Models
                 entity.Property(e => e.Slut).HasColumnType("datetime");
 
                 entity.Property(e => e.Start).HasColumnType("datetime");
+            });
+
+            modelBuilder.Entity<MøderBruger>(entity =>
+            {
+                entity.HasKey(e => new { e.MødeId, e.Uid });
+
+                entity.ToTable("Møder_Bruger");
+
+                entity.Property(e => e.Uid).HasMaxLength(30);
+
+                entity.HasOne(d => d.Møde)
+                    .WithMany(p => p.MøderBruger)
+                    .HasForeignKey(d => d.MødeId)
+                    .OnDelete(DeleteBehavior.ClientSetNull)
+                    .HasConstraintName("FK_Møder_Bruger_Møder");
+
+                entity.HasOne(d => d.U)
+                    .WithMany(p => p.MøderBruger)
+                    .HasForeignKey(d => d.Uid)
+                    .OnDelete(DeleteBehavior.ClientSetNull)
+                    .HasConstraintName("FK_Møder_Bruger_Brugere");
             });
 
             modelBuilder.Entity<Nyheder>(entity =>

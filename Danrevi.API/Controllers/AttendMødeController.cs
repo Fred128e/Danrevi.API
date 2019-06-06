@@ -6,62 +6,61 @@ using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using Danrevi.API.Models;
-using Microsoft.CodeAnalysis.Options;
 
 namespace Danrevi.API.Controllers
 {
     [Route("api/[controller]")]
     [ApiController]
-    public class AttendController:ControllerBase
+    public class AttendMødeController:ControllerBase
     {
         private readonly DanreviDbContext _context;
 
-        public AttendController(DanreviDbContext context)
+        public AttendMødeController(DanreviDbContext context)
         {
             _context = context;
         }
 
-        // GET: api/Attend
+        // GET: api/AttendMøde
         [HttpGet]
-        public IEnumerable<BrugerKurser> GetBrugerKurser()
+        public IEnumerable<MøderBruger> GetMøderBruger()
         {
-            return _context.BrugerKurser;
+            return _context.MøderBruger;
         }
 
-        // GET: api/Attend/5
+        // GET: api/AttendMøde/5
         [HttpGet("{id}")]
-        public async Task<IActionResult> GetBrugerKurser([FromRoute] int id)
+        public async Task<IActionResult> GetMøderBruger([FromRoute] int id)
         {
             if(!ModelState.IsValid)
             {
                 return BadRequest(ModelState);
             }
 
-            var brugerKurser = await _context.BrugerKurser.FindAsync(id);
+            var møderBruger = await _context.MøderBruger.FindAsync(id);
 
-            if(brugerKurser == null)
+            if(møderBruger == null)
             {
                 return NotFound();
             }
 
-            return Ok(brugerKurser);
+            return Ok(møderBruger);
         }
 
-        // PUT: api/Attend/5
+        // PUT: api/AttendMøde/5
         [HttpPut("{id}")]
-        public async Task<IActionResult> PutBrugerKurser([FromRoute] int id,[FromBody] BrugerKurser brugerKurser)
+        public async Task<IActionResult> PutMøderBruger([FromRoute] int id,[FromBody] MøderBruger møderBruger)
         {
             if(!ModelState.IsValid)
             {
                 return BadRequest(ModelState);
             }
 
-            if(id != brugerKurser.KursusId)
+            if(id != møderBruger.MødeId)
             {
                 return BadRequest();
             }
 
-            _context.Entry(brugerKurser).State = EntityState.Modified;
+            _context.Entry(møderBruger).State = EntityState.Modified;
 
             try
             {
@@ -69,7 +68,7 @@ namespace Danrevi.API.Controllers
             }
             catch(DbUpdateConcurrencyException)
             {
-                if(!BrugerKurserExists(id))
+                if(!MøderBrugerExists(id))
                 {
                     return NotFound();
                 }
@@ -82,32 +81,33 @@ namespace Danrevi.API.Controllers
             return NoContent();
         }
 
-        // POST: api/Attend
-        [HttpPost("{id}/{kid}")]
-        public async Task<IActionResult> PostBrugerKurser(string id,int kid)
+        // POST: api/AttendMøde
+        [HttpPost("{id}/{mId}")]
+        public async Task<IActionResult> PostMøderBruger(string id,int mId)
         {
-            if(string.IsNullOrEmpty(id))
-                return BadRequest();
-            if(kid < 0)
-                return BadRequest();
-
-            var user = _context.Brugere.Find(id);
-            var kursus = _context.Kurser.Find(kid);
-            BrugerKurser k = new BrugerKurser { KursusId = kid,Uid = id.ToString(),Kursus = kursus,U = user };
+            var bruger = _context.Brugere.Find(id);
+            var møder = _context.Møder.Find(mId);
+            MøderBruger m = new MøderBruger
+            {
+                MødeId = mId,
+                Uid = id.ToString(),
+                Møde = møder,
+                U = bruger
+            };
 
             if(!ModelState.IsValid)
             {
                 return BadRequest(ModelState);
             }
 
-            _context.BrugerKurser.Add(k);
+            _context.MøderBruger.Add(m);
             try
             {
                 await _context.SaveChangesAsync();
             }
             catch(DbUpdateException)
             {
-                if(BrugerKurserExists(k.KursusId))
+                if(MøderBrugerExists(m.MødeId))
                 {
                     return new StatusCodeResult(StatusCodes.Status409Conflict);
                 }
@@ -120,9 +120,9 @@ namespace Danrevi.API.Controllers
             return Ok();
         }
 
-        // DELETE: api/Attend/5
-        [HttpDelete("{id}/{kid}")]
-        public async Task<IActionResult> DeleteBrugerKurser(string id,int kid)
+        // DELETE: api/AttendMøde/5
+        [HttpDelete("{id}/{mId}")]
+        public async Task<IActionResult> DeleteMøderBruger([FromRoute] string id,int mId)
         {
             if(!ModelState.IsValid)
             {
@@ -135,15 +135,19 @@ namespace Danrevi.API.Controllers
                 if(user == null)
                     return NotFound();
 
-                var kursus = _context.Kurser.Find(kid);
-                if(kursus == null)
-                    return NotFound();
-                BrugerKurser k = new BrugerKurser { KursusId = kid,Uid = id.ToString(),Kursus = kursus,U = user };
-                _context.BrugerKurser.Remove(k);
+                var møder = _context.Møder.Find(mId);
+                MøderBruger m = new MøderBruger
+                {
+                    MødeId = mId,
+                    Uid = id.ToString(),
+                    Møde = møder,
+                    U = user
+                };
+
+                _context.MøderBruger.Remove(m);
                 await _context.SaveChangesAsync();
 
-                return Ok(k);
-
+                return Ok(m);
             }
             catch(Exception)
             {
@@ -152,9 +156,9 @@ namespace Danrevi.API.Controllers
 
         }
 
-        private bool BrugerKurserExists(int id)
+        private bool MøderBrugerExists(int id)
         {
-            return _context.BrugerKurser.Any(e => e.KursusId == id);
+            return _context.MøderBruger.Any(e => e.MødeId == id);
         }
     }
 }
