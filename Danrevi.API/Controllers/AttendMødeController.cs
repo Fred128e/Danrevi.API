@@ -6,37 +6,47 @@ using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using Danrevi.API.Models;
+using Danrevi.API.Services;
+using Microsoft.AspNetCore.Authorization;
 
 namespace Danrevi.API.Controllers
 {
     [Route("api/[controller]")]
     [ApiController]
+    [Authorize]
     public class AttendMødeController:ControllerBase
     {
         private readonly DanreviDbContext _context;
+        private readonly IUserContext _userContext;
 
-        public AttendMødeController(DanreviDbContext context)
+        public AttendMødeController(DanreviDbContext context, IUserContext admin)
         {
             _context = context;
+            _userContext = admin;
         }
 
         // GET: api/AttendMøde
         [HttpGet]
         public IEnumerable<MøderBruger> GetMøderBruger()
         {
+            var isAdmin = _userContext.IsAdmin(this.User);
+            if(!isAdmin)
+            {
+                return null;
+            }
             return _context.MøderBruger;
         }
 
         // GET: api/AttendMøde/5
         [HttpGet("{id}")]
-        public async Task<IActionResult> GetMøderBruger([FromRoute] int id)
+        public async Task<IActionResult> GetMøderBruger([FromRoute] string id, int mId)
         {
             if(!ModelState.IsValid)
             {
                 return BadRequest(ModelState);
             }
 
-            var møderBruger = await _context.MøderBruger.FindAsync(id);
+            var møderBruger = await _context.MøderBruger.FindAsync(mId);
 
             if(møderBruger == null)
             {

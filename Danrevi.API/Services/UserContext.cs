@@ -18,8 +18,15 @@ namespace Danrevi.API.Services
         public bool IsAdmin(ClaimsPrincipal user)
         {
             var userid = user.FindFirst(ClaimTypes.NameIdentifier).Value;
-            var currentUSer = _context.Brugere.Single(x => x.FirebaseUid.CompareTo(userid) == 0);
-            return currentUSer.IsAdmin;
+            var currentUser = _context.Brugere.Single(x => x.FirebaseUid.CompareTo(userid) == 0);
+            return currentUser.IsAdmin;
         }
+
+        public string UserId(ClaimsPrincipal user)
+        {
+            return user.FindFirst(ClaimTypes.NameIdentifier).Value;
+        }
+
+       
     }
 }

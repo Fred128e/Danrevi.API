@@ -6,31 +6,41 @@ using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using Danrevi.API.Models;
+using Danrevi.API.Services;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.CodeAnalysis.Options;
 
 namespace Danrevi.API.Controllers
 {
     [Route("api/[controller]")]
     [ApiController]
+    [Authorize]
     public class AttendController:ControllerBase
     {
         private readonly DanreviDbContext _context;
+        private readonly IUserContext _userContext;
 
-        public AttendController(DanreviDbContext context)
+        public AttendController(DanreviDbContext context, IUserContext admin)
         {
             _context = context;
+            _userContext = admin;
         }
 
         // GET: api/Attend
         [HttpGet]
         public IEnumerable<BrugerKurser> GetBrugerKurser()
         {
+            var isAdmin = _userContext.IsAdmin(this.User);
+            if(!isAdmin)
+            {
+                return null;
+            }
             return _context.BrugerKurser;
         }
 
         // GET: api/Attend/5
         [HttpGet("{id}")]
-        public async Task<IActionResult> GetBrugerKurser([FromRoute] int id)
+        public async Task<IActionResult> GetBrugerKurser([FromRoute] string id)
         {
             if(!ModelState.IsValid)
             {

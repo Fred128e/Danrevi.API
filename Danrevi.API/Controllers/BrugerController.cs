@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Linq;
+using System.Net;
 using System.Security.Claims;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Http;
@@ -9,11 +10,13 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using Danrevi.API.Models;
 using Danrevi.API.Services;
+using Microsoft.AspNetCore.Authorization;
 
 namespace Danrevi.API.Controllers
 {
     [Route("api/[controller]")]
     [ApiController]
+    [Authorize]
     public class BrugerController:ControllerBase
     {
         private readonly DanreviDbContext _context;
@@ -109,14 +112,15 @@ namespace Danrevi.API.Controllers
 
             if(UserExists(brugere.FirebaseUid))
             {
-                return NoContent();
+                var x = await _context.Brugere.FindAsync(brugere.FirebaseUid);
+                if(x == null)
+                {
+                    return NotFound();
+                }
+                return Ok(x);
             }
 
-            var isAdmin = _usercontext.IsAdmin(this.User);
-            if(!isAdmin)
-            {
-                return NoContent();
-            }
+           
 
             _context.Brugere.Add(brugere);
             try
@@ -125,17 +129,28 @@ namespace Danrevi.API.Controllers
             }
             catch(DbUpdateException)
             {
-                if(UserExists(brugere.FirebaseUid))
-                {
-                    return new StatusCodeResult(StatusCodes.Status409Conflict);
-                }
-                else
-                {
-                    throw;
-                }
+                //if(UserExists(brugere.FirebaseUid))
+                //{
+                //    var x = await _context.Brugere.FindAsync(brugere.FirebaseUid);
+                //    return Ok(x);
+                //   // return new StatusCodeResult(StatusCodes.Status409Conflict);
+                //}
+                //else
+                //{
+                //    throw;
+                //}
             }
 
-            return CreatedAtAction("GetBrugere",new { id = brugere.FirebaseUid },brugere);
+            var y = await _context.Brugere.FindAsync(brugere.FirebaseUid);
+
+            if(y == null)
+            {
+                return NotFound();
+            }
+
+            return Ok(y);
+
+         //   return CreatedAtAction("GetBrugere",new { id = brugere.FirebaseUid },brugere);
         }
 
         // DELETE: api/Bruger/5

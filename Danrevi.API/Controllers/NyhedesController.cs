@@ -29,6 +29,7 @@ namespace Danrevi.API.Controllers
 
         // GET: api/Nyhedes
         [HttpGet]
+        [AllowAnonymous]
         public IEnumerable<Nyheder> GetNyheder()
         {
             return _context.Nyheder;
@@ -36,6 +37,7 @@ namespace Danrevi.API.Controllers
 
         // GET: api/Nyhedes/5
         [HttpGet("{id}")]
+        [AllowAnonymous]
         public async Task<IActionResult> GetNyheder([FromRoute] int id)
         {
             if (!ModelState.IsValid)

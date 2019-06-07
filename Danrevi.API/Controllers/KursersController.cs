@@ -46,7 +46,9 @@ namespace Danrevi.API.Controllers
         [HttpGet]
         public IEnumerable<Kurser> GetKurser()
         {
-            return _context.Kurser;
+            var id = _usercontext.UserId(this.User);
+            var res= _context.Kurser.Include(z => z.BrugerKurser);
+            return res;
         }
 
         // GET: api/Kursers/5

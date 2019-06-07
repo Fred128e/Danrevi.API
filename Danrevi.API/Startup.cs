@@ -36,10 +36,14 @@ namespace Danrevi.API
             services.AddDbContext<DanreviDbContext>(options =>
                 options.UseSqlServer(Configuration.GetConnectionString("SqlConn")));
             services.AddScoped<IUserContext,UserContext>();
+               
+
             services.AddMvc().AddJsonOptions(options =>
             {
                 options.SerializerSettings.NullValueHandling = NullValueHandling.Ignore;
                 options.SerializerSettings.DateFormatString = "yyyy-MM-dd HH:mm:ss";
+                 options.SerializerSettings.ReferenceLoopHandling =
+                    Newtonsoft.Json.ReferenceLoopHandling.Ignore;
             });
 
             services.AddCors(options =>

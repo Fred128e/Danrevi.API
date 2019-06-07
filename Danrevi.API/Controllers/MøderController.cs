@@ -15,12 +15,12 @@ namespace Danrevi.API.Controllers
     [Route("api/møder")]
     [ApiController]
     [Authorize]
-    public class MøderController : ControllerBase
+    public class MøderController:ControllerBase
     {
         private readonly DanreviDbContext _context;
         private readonly IUserContext _usercontext;
 
-        public MøderController(DanreviDbContext context, IUserContext admin)
+        public MøderController(DanreviDbContext context,IUserContext admin)
         {
             _context = context;
             _usercontext = admin;
@@ -30,24 +30,24 @@ namespace Danrevi.API.Controllers
         [HttpGet]
         public IEnumerable<Møder> GetMøder()
         {
-            
-            return _context.Møder;
+            var res = _context.Møder.Include(m => m.MøderBruger);
+            return res;
         }
 
         // GET: api/Møder/5
         [HttpGet("{id}")]
         public async Task<IActionResult> GetMøder([FromRoute] int id)
         {
-            if (!ModelState.IsValid)
+            if(!ModelState.IsValid)
             {
                 return BadRequest(ModelState);
             }
 
-           
+
 
             var møder = await _context.Møder.FindAsync(id);
 
-            if (møder == null)
+            if(møder == null)
             {
                 return NotFound();
             }
@@ -57,9 +57,9 @@ namespace Danrevi.API.Controllers
 
         // PUT: api/Møder/5
         [HttpPut("{id}")]
-        public async Task<IActionResult> PutMøder([FromRoute] int id, [FromBody] Møder møder)
+        public async Task<IActionResult> PutMøder([FromRoute] int id,[FromBody] Møder møder)
         {
-            if (!ModelState.IsValid)
+            if(!ModelState.IsValid)
             {
                 return BadRequest(ModelState);
             }
@@ -70,7 +70,7 @@ namespace Danrevi.API.Controllers
                 return null;
             }
 
-            if (id != møder.Id)
+            if(id != møder.Id)
             {
                 return BadRequest();
             }
@@ -81,9 +81,9 @@ namespace Danrevi.API.Controllers
             {
                 await _context.SaveChangesAsync();
             }
-            catch (DbUpdateConcurrencyException)
+            catch(DbUpdateConcurrencyException)
             {
-                if (!MøderExists(id))
+                if(!MøderExists(id))
                 {
                     return NotFound();
                 }
@@ -100,7 +100,7 @@ namespace Danrevi.API.Controllers
         [HttpPost]
         public async Task<IActionResult> PostMøder([FromBody] Møder møder)
         {
-            if (!ModelState.IsValid)
+            if(!ModelState.IsValid)
             {
                 return BadRequest(ModelState);
             }
@@ -114,14 +114,14 @@ namespace Danrevi.API.Controllers
             _context.Møder.Add(møder);
             await _context.SaveChangesAsync();
 
-            return CreatedAtAction("GetMøder", new { id = møder.Id }, møder);
+            return CreatedAtAction("GetMøder",new { id = møder.Id },møder);
         }
 
         // DELETE: api/Møder/5
         [HttpDelete("{id}")]
         public async Task<IActionResult> DeleteMøder([FromRoute] int id)
         {
-            if (!ModelState.IsValid)
+            if(!ModelState.IsValid)
             {
                 return BadRequest(ModelState);
             }
@@ -133,7 +133,7 @@ namespace Danrevi.API.Controllers
             }
 
             var møder = await _context.Møder.FindAsync(id);
-            if (møder == null)
+            if(møder == null)
             {
                 return NotFound();
             }
