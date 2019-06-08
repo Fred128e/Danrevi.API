@@ -22,6 +22,8 @@ namespace Danrevi.API.Models
         public virtual DbSet<Møder> Møder { get; set; }
         public virtual DbSet<MøderBruger> MøderBruger { get; set; }
         public virtual DbSet<Nyheder> Nyheder { get; set; }
+        public DbQuery<KursusOversigt> KursusOversigt { get; set; }
+        public DbQuery<MødeOversigt> MødeOversigt { get; set; }
 
         protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
         {

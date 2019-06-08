@@ -6,18 +6,21 @@ using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using Danrevi.API.Models;
+using Danrevi.API.Services;
 
 namespace Danrevi.API.Controllers
 {
     [Route("api/[controller]")]
     [ApiController]
-    public class MyCoursesController : ControllerBase
+    public class MyCoursesController:ControllerBase
     {
         private readonly DanreviDbContext _context;
+        private readonly IUserContext _userContext;
 
-        public MyCoursesController(DanreviDbContext context)
+        public MyCoursesController(DanreviDbContext context,IUserContext userContext)
         {
             _context = context;
+            _userContext = userContext;
         }
 
         // GET: api/MyCourses
@@ -25,8 +28,8 @@ namespace Danrevi.API.Controllers
         public IEnumerable<BrugerKurser> GetBrugerKurser()
         {
             var res = _context.BrugerKurser.Include(c => c.Kursus);
-                
-                
+
+
 
             return res;
             // 
@@ -41,7 +44,15 @@ namespace Danrevi.API.Controllers
                 return BadRequest(ModelState);
             }
 
-            var brugerKurser = _context.BrugerKurser.Where(x => x.Uid.CompareTo(id) == 0).Select(x=>x.Kursus);
+            var isAdmin = _userContext.IsAdmin(User);
+            if(isAdmin)
+            {
+                var kursusOversigt = _context.KursusOversigt.FromSql(
+                    @"spu_CourseOverview");
+                return Ok(kursusOversigt);
+            }
+
+            var brugerKurser = _context.BrugerKurser.Where(x => x.Uid.CompareTo(id) == 0).Select(x => x.Kursus);
             if(brugerKurser == null)
             {
                 return NotFound();
@@ -53,14 +64,14 @@ namespace Danrevi.API.Controllers
         [HttpGet("{id}/{uid}")]
         public async Task<IActionResult> GetBrugerKurser([FromRoute] int id)
         {
-            if (!ModelState.IsValid)
+            if(!ModelState.IsValid)
             {
                 return BadRequest(ModelState);
             }
 
             var brugerKurser = await _context.BrugerKurser.FindAsync(id);
 
-            if (brugerKurser == null)
+            if(brugerKurser == null)
             {
                 return NotFound();
             }
@@ -70,14 +81,14 @@ namespace Danrevi.API.Controllers
 
         // PUT: api/MyCourses/5
         [HttpPut("{id}")]
-        public async Task<IActionResult> PutBrugerKurser([FromRoute] int id, [FromBody] BrugerKurser brugerKurser)
+        public async Task<IActionResult> PutBrugerKurser([FromRoute] int id,[FromBody] BrugerKurser brugerKurser)
         {
-            if (!ModelState.IsValid)
+            if(!ModelState.IsValid)
             {
                 return BadRequest(ModelState);
             }
 
-            if (id != brugerKurser.KursusId)
+            if(id != brugerKurser.KursusId)
             {
                 return BadRequest();
             }
@@ -88,9 +99,9 @@ namespace Danrevi.API.Controllers
             {
                 await _context.SaveChangesAsync();
             }
-            catch (DbUpdateConcurrencyException)
+            catch(DbUpdateConcurrencyException)
             {
-                if (!BrugerKurserExists(id))
+                if(!BrugerKurserExists(id))
                 {
                     return NotFound();
                 }
@@ -107,7 +118,7 @@ namespace Danrevi.API.Controllers
         [HttpPost]
         public async Task<IActionResult> PostBrugerKurser([FromBody] BrugerKurser brugerKurser)
         {
-            if (!ModelState.IsValid)
+            if(!ModelState.IsValid)
             {
                 return BadRequest(ModelState);
             }
@@ -117,9 +128,9 @@ namespace Danrevi.API.Controllers
             {
                 await _context.SaveChangesAsync();
             }
-            catch (DbUpdateException)
+            catch(DbUpdateException)
             {
-                if (BrugerKurserExists(brugerKurser.KursusId))
+                if(BrugerKurserExists(brugerKurser.KursusId))
                 {
                     return new StatusCodeResult(StatusCodes.Status409Conflict);
                 }
@@ -129,20 +140,20 @@ namespace Danrevi.API.Controllers
                 }
             }
 
-            return CreatedAtAction("GetBrugerKurser", new { id = brugerKurser.KursusId }, brugerKurser);
+            return CreatedAtAction("GetBrugerKurser",new { id = brugerKurser.KursusId },brugerKurser);
         }
 
         // DELETE: api/MyCourses/5
         [HttpDelete("{id}")]
         public async Task<IActionResult> DeleteBrugerKurser([FromRoute] int id)
         {
-            if (!ModelState.IsValid)
+            if(!ModelState.IsValid)
             {
                 return BadRequest(ModelState);
             }
 
             var brugerKurser = await _context.BrugerKurser.FindAsync(id);
-            if (brugerKurser == null)
+            if(brugerKurser == null)
             {
                 return NotFound();
             }

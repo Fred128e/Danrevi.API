@@ -6,6 +6,7 @@ using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using Danrevi.API.Models;
+using Danrevi.API.Services;
 
 namespace Danrevi.API.Controllers
 {
@@ -14,10 +15,12 @@ namespace Danrevi.API.Controllers
     public class MyMeetingsController : ControllerBase
     {
         private readonly DanreviDbContext _context;
+        private readonly IUserContext _userContext;
 
-        public MyMeetingsController(DanreviDbContext context)
+        public MyMeetingsController(DanreviDbContext context,IUserContext userContext)
         {
             _context = context;
+            _userContext = userContext;
         }
 
         // GET: api/MyMeetings
@@ -35,6 +38,13 @@ namespace Danrevi.API.Controllers
             if (!ModelState.IsValid)
             {
                 return BadRequest(ModelState);
+            }
+
+            var isAdmin = _userContext.IsAdmin(User);
+            if (isAdmin)
+            {
+                var mødeOversigt = _context.MødeOversigt.FromSql(@"spu_MeetingOverview");
+                return Ok(mødeOversigt);
             }
 
             var møderBruger = _context.MøderBruger.Where(m => m.Uid.CompareTo(id) == 0).Select(m => m.Møde);
