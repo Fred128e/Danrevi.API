@@ -29,18 +29,6 @@ namespace Danrevi.API.Controllers
             _usercontext = admin;
         }
 
-        //lave et interface IUserAdmin
-        //inject shit i DI
-        //IUserAdmin med i ctor på alle controller
-        //pbulic admin: iuseradmin
-        //ctor (DanreviDbContext context)
-        //IUserAdmin har en method IsAdmin()
-        /*
-         *public bool IsAdmin(ClaimsPrincipal user) {
-         * var userid = user.FindFirst(ClaimTypes.NameIdentifier).Value;
-            var user = _context.Brugere.Single(x => x.FirebaseUid.CompareTo(userid) == 0);
-            return user.IsAdmin
-         */
 
         // GET: api/Kursers
         [HttpGet]
@@ -51,6 +39,15 @@ namespace Danrevi.API.Controllers
             return res;
         }
 
+        [HttpGet]
+        [Route("public")]
+        [AllowAnonymous]
+        public IEnumerable<Kurser> GetPublicKurser()
+        {
+
+            var res = _context.Kurser;
+            return res;
+        }
         // GET: api/Kursers/5
         [HttpGet("{id}")]
         public async Task<IActionResult> GetKurser([FromRoute] int id)

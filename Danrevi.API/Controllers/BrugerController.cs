@@ -117,6 +117,9 @@ namespace Danrevi.API.Controllers
                 {
                     return NotFound();
                 }
+
+                x.BrugerKurser = null;
+                x.MøderBruger = null;
                 return Ok(x);
             }
 
